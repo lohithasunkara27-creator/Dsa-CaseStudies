@@ -1,40 +1,38 @@
-class Patient {
+class Node {
     int patientId;
     String name;
-
-    Patient(int patientId, String name) {
-        this.patientId = patientId;
-        this.name = name;
-    }
-}
-
-class AVLNode {
-    Patient patient;
-    AVLNode left, right;
+    Node left, right;
     int height;
 
-    AVLNode(Patient patient) {
-        this.patient = patient;
-        height = 1;
+    Node(int patientId, String name) {
+        this.patientId = patientId;
+        this.name = name;
+        this.height = 1;
     }
 }
 
-class AVLTree {
+public class MediFlowHealthcare {
 
-    int height(AVLNode node) {
-        return (node == null) ? 0 : node.height;
+    Node root;
+
+    int height(Node n) {
+        if (n == null)
+            return 0;
+        return n.height;
     }
 
-    int getBalance(AVLNode node) {
-        return (node == null) ? 0 : height(node.left) - height(node.right);
+    int getBalance(Node n) {
+        if (n == null)
+            return 0;
+        return height(n.left) - height(n.right);
     }
 
-    AVLNode rightRotate(AVLNode y) {
-        AVLNode x = y.left;
-        AVLNode T2 = x.right;
+    Node rightRotate(Node y) {
+        Node x = y.left;
+        Node t2 = x.right;
 
         x.right = y;
-        y.left = T2;
+        y.left = t2;
 
         y.height = Math.max(height(y.left), height(y.right)) + 1;
         x.height = Math.max(height(x.left), height(x.right)) + 1;
@@ -42,12 +40,12 @@ class AVLTree {
         return x;
     }
 
-    AVLNode leftRotate(AVLNode x) {
-        AVLNode y = x.right;
-        AVLNode T2 = y.left;
+    Node leftRotate(Node x) {
+        Node y = x.right;
+        Node t2 = y.left;
 
         y.left = x;
-        x.right = T2;
+        x.right = t2;
 
         x.height = Math.max(height(x.left), height(x.right)) + 1;
         y.height = Math.max(height(y.left), height(y.right)) + 1;
@@ -55,15 +53,15 @@ class AVLTree {
         return y;
     }
 
-    AVLNode insert(AVLNode node, Patient patient) {
+    Node insert(Node node, int id, String name) {
 
         if (node == null)
-            return new AVLNode(patient);
+            return new Node(id, name);
 
-        if (patient.patientId < node.patient.patientId)
-            node.left = insert(node.left, patient);
-        else if (patient.patientId > node.patient.patientId)
-            node.right = insert(node.right, patient);
+        if (id < node.patientId)
+            node.left = insert(node.left, id, name);
+        else if (id > node.patientId)
+            node.right = insert(node.right, id, name);
         else
             return node;
 
@@ -72,21 +70,21 @@ class AVLTree {
         int balance = getBalance(node);
 
         // LL Rotation
-        if (balance > 1 && patient.patientId < node.left.patient.patientId)
+        if (balance > 1 && id < node.left.patientId)
             return rightRotate(node);
 
         // RR Rotation
-        if (balance < -1 && patient.patientId > node.right.patient.patientId)
+        if (balance < -1 && id > node.right.patientId)
             return leftRotate(node);
 
         // LR Rotation
-        if (balance > 1 && patient.patientId > node.left.patient.patientId) {
+        if (balance > 1 && id > node.left.patientId) {
             node.left = leftRotate(node.left);
             return rightRotate(node);
         }
 
         // RL Rotation
-        if (balance < -1 && patient.patientId < node.right.patient.patientId) {
+        if (balance < -1 && id < node.right.patientId) {
             node.right = rightRotate(node.right);
             return leftRotate(node);
         }
@@ -94,53 +92,45 @@ class AVLTree {
         return node;
     }
 
-    void inorder(AVLNode root) {
-        if (root != null) {
-            inorder(root.left);
-            System.out.println(root.patient.patientId + " -> " + root.patient.name);
-            inorder(root.right);
-        }
-    }
-
-    AVLNode search(AVLNode root, int id) {
-        if (root == null || root.patient.patientId == id)
+    Node search(Node root, int id) {
+        if (root == null || root.patientId == id)
             return root;
 
-        if (id < root.patient.patientId)
+        if (id < root.patientId)
             return search(root.left, id);
 
         return search(root.right, id);
     }
-}
 
-public class MediFlowHealthcare {
+    void inorder(Node root) {
+        if (root != null) {
+            inorder(root.left);
+            System.out.println(root.patientId + " -> " + root.name);
+            inorder(root.right);
+        }
+    }
 
     public static void main(String[] args) {
 
-        AVLTree tree = new AVLTree();
-        AVLNode root = null;
+        MediFlowHealthcare tree = new MediFlowHealthcare();
 
-        root = tree.insert(root, new Patient(120, "Akash"));
-        root = tree.insert(root, new Patient(105, "Priya"));
-        root = tree.insert(root, new Patient(150, "Kiran"));
-        root = tree.insert(root, new Patient(101, "Rahul"));
-        root = tree.insert(root, new Patient(135, "Sneha"));
+        tree.root = tree.insert(tree.root, 120, "Akash");
+        tree.root = tree.insert(tree.root, 105, "Priya");
+        tree.root = tree.insert(tree.root, 150, "Kiran");
+        tree.root = tree.insert(tree.root, 101, "Rahul");
+        tree.root = tree.insert(tree.root, 135, "Sneha");
 
-        System.out.println("=== MediFlow Healthcare Management System ===");
+        System.out.println("=== MediFlow Healthcare Management System ===\n");
 
-        System.out.println("\nPatient Records (Inorder Traversal):");
-        tree.inorder(root);
+        System.out.println("Patient Records (Inorder Traversal):");
+        tree.inorder(tree.root);
 
-        int searchId = 120;
-
-        AVLNode result = tree.search(root, searchId);
+        Node result = tree.search(tree.root, 120);
 
         if (result != null) {
             System.out.println("\nPatient Found:");
-            System.out.println("ID: " + result.patient.patientId);
-            System.out.println("Name: " + result.patient.name);
-        } else {
-            System.out.println("\nPatient Not Found");
+            System.out.println("ID: " + result.patientId);
+            System.out.println("Name: " + result.name);
         }
 
         System.out.println("\nAVL Tree Balanced Successfully");
